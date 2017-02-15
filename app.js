@@ -1,62 +1,38 @@
 (function () {
-'use strict';
+  'use strict';
+  // Defining the angular module
+  angular.module('lunchChecker', [])
 
-angular.module('ShoppingListCheckOff', [])
-.controller('ToBuyController', ToBuyController)
-.controller('AlreadyBoughtController', AlreadyBoughtController)
-.service('ShoppingListCheckOffService', ShoppingListCheckOffService);
+  // Defining the angular controller.
+  .controller('LunchCheckerController', LunchCheckerController);
 
-ToBuyController.$inject = ['ShoppingListCheckOffService'];
-function ToBuyController(ShoppingListCheckOffService){
-  var buy = this;
-  buy.itemsToBuy = ShoppingListCheckOffService.getBuyList();
-  buy.itemsAlreadyBought = ShoppingListCheckOffService.getBoughtList();
+  // Injecting the scope variable through injector to make it minification issue-free
+  LunchCheckerController.$inject = ['$scope'];
+  function LunchCheckerController ($scope) {
+    var allowedSize = 3; // variable to store the allowed size of menu items.
+    $scope.lstLunchItm = ""; // variable to hold list of the lunch items.
+    $scope.validationMsg = ""; // validation message.
 
-  buy.boughtItem = function(itemIndex){
-    ShoppingListCheckOffService.boughtItem(itemIndex);
-  }
+    $scope.validateItems = function () {
+      $scope.validationMsg = checkItems($scope.lstLunchItm, allowedSize);
+    }
 
-  buy.listBuyEmpty = function(){
-    return buy.itemsToBuy.length == 0;
-  }
-}
+    // Function that returns a message based on the allowed size of the items.
+    function checkItems (string, allowedSize) {
+      var stringContents = string.split(",");
+      var stringContentSize = stringContents.length;
+      var msg = "";
 
-AlreadyBoughtController.$inject = ['ShoppingListCheckOffService'];
-function AlreadyBoughtController(ShoppingListCheckOffService){
-  var bought = this;
-  bought.itemsAlreadyBought = ShoppingListCheckOffService.getBoughtList();
+      if (stringContentSize == 0 || string == "") {
+        msg = "Please enter data first.";
+      } else if(stringContentSize > allowedSize) {
+        msg = "Too Much!";
+      } else {
+        msg = "Enjoy!";
+      }
 
-  bought.listBoughtEmpty = function(){
-    return bought.itemsAlreadyBought.length == 0;
-  }
+      return msg;
+    }
 
-}
-
-function ShoppingListCheckOffService(){
-  var service = this;
-
-  var buyList = [
-    { name: "Laptops", quantity: 15 },
-    { name: "Keyboards", quantity: 9 },
-    { name: "Mouse", quantity: 6 },
-    { name: "Headset", quantity: 4 },
-    { name: "Speakers", quantity: 9 }
-  ];
-
-  var boughtList = [];
-
-  service.getBuyList = function(){
-    return buyList;
-  }
-
-  service.getBoughtList = function(){
-    return boughtList;
-  }
-
-  service.boughtItem = function(itemIndex){
-    var item = buyList.splice(itemIndex,1)[0];
-    boughtList.push({name:item.name, quantity:item.quantity});
-  }
-}
-
+  };
 })();
